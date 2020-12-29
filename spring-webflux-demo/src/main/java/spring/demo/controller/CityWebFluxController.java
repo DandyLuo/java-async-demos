@@ -22,7 +22,6 @@ import spring.demo.handler.CityHandler;
 @RestController
 @RequestMapping(value = "/city")
 public class CityWebFluxController {
-
     @Autowired
     private CityHandler cityHandler;
 
