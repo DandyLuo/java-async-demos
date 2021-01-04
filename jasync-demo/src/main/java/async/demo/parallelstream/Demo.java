@@ -1,4 +1,4 @@
-package concurrence.demo.parallelstream;
+package async.demo.parallelstream;
 
 import java.util.ArrayList;
 import java.util.Arrays;

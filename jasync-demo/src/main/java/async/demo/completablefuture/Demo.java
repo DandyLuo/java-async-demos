@@ -1,4 +1,4 @@
-package concurrence.demo.completablefuture;
+package async.demo.completablefuture;
 
 import java.util.ArrayList;
 import java.util.List;
