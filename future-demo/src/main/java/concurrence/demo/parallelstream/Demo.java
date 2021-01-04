@@ -1,6 +1,7 @@
 package concurrence.demo.parallelstream;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -16,6 +17,9 @@ import org.springframework.util.CollectionUtils;
  */
 public final class Demo {
     static final Demo WORKER = new Demo();
+    static final Demo.Correct CORRECT_WORKER = new Demo.Correct();
+    static final Demo.Incorrect INCORRECT_WORKER = new Demo.Incorrect();
+
     private Demo() {}
 
     /**
@@ -43,8 +47,6 @@ public final class Demo {
      * 正确示范类
      */
     public static final class Correct {
-        private Correct() {}
-
         /**
          * parallel add to List
          *
@@ -52,7 +54,7 @@ public final class Demo {
          *
          * @return exactly equal to size
          */
-        public static int threadSafeAddToList(final int size) {
+        public int threadSafeAddToList(final int size) {
             final List<Integer> values = new CopyOnWriteArrayList<>();
             IntStream.range(0, size).parallel().forEach(values::add);
             return values.size();
@@ -65,7 +67,7 @@ public final class Demo {
          *
          * @return exactly equal to values.size
          */
-        public static int threadSafeAddToList2(final List<Integer> values) {
+        public int threadSafeAddToList2(final List<Integer> values) {
             if (CollectionUtils.isEmpty(values)) {
                 return 0;
             }
@@ -80,16 +82,16 @@ public final class Demo {
          *
          * @return sum of entity's price
          */
-        public static int sum(final List<Entity> entityList) {
+        public int sum(final List<Entity> entityList) {
             return entityList.stream().parallel().mapToInt(Entity::getPrice).sum();
         }
 
         /**
-         * 模拟CPU密集型作业的并行处理方法
+         * mock CPU calculation
          *
          * @param size
          */
-        public static void mockJob(final int size) {
+        public void mockJob(final int size) {
             final long mainStartTime = System.currentTimeMillis();
             //开始并行执行
             IntStream.range(0, size).parallel().forEach(i -> {
@@ -104,13 +106,38 @@ public final class Demo {
             final long mainEndTime = System.currentTimeMillis();
             System.out.println("执行完毕，总共耗时:" + (mainEndTime - mainStartTime));
         }
+
+        /**
+         * parallel up case str
+         *
+         * @param strList
+         */
+        public List<String> parallelUpCaseStr(final List<String> strList) {
+            if (CollectionUtils.isEmpty(strList)) {
+                return new ArrayList<>();
+            }
+            return strList.stream().parallel().map(String::toUpperCase).collect(ArrayList::new, ArrayList::add, (t, u) -> {
+                System.out.println("leftJoin:" + t + " rightJoin:" + u);
+                t.addAll(u);
+            });
+        }
+
+        /**
+         * parallel distinct
+         *
+         * @param strList
+         *
+         * @return
+         */
+        public List<String> distinct(final List<String> strList) {
+            return strList.parallelStream().distinct().collect(Collectors.toList());
+        }
     }
 
     /**
      * 错误示范类
      */
     public static final class Incorrect {
-        private Incorrect() {}
 
         /**
          * 错误原因：在parallelStream内使用线程不安全的容器ArrayList
@@ -121,7 +148,7 @@ public final class Demo {
          *
          * @throws java.lang.ArrayIndexOutOfBoundsException
          */
-        public static int threadUnsafeAdd(final int size) {
+        public int addToList(final int size) {
             final List<Integer> values = new ArrayList<>();
             IntStream.range(0, size).parallel().forEach(values::add);
             return values.size();
@@ -129,8 +156,6 @@ public final class Demo {
     }
 
     public static void main(String[] args) {
-        final List<Entity> entities = WORKER.randomBuildId(100);
-        final long sum = entities.stream().mapToLong(Entity::getPrice).sum();
-        System.out.println(sum == Demo.Correct.sum(entities));
+        System.out.println(CORRECT_WORKER.distinct(new ArrayList<>(Arrays.asList("A","B","A","C"))));
     }
 }
