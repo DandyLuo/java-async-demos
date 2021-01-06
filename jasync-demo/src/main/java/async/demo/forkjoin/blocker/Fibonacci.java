@@ -11,6 +11,9 @@ import java.util.concurrent.RecursiveTask;
 /**
  * 斐波那契数列
  * 使用ManagedBlocker
+ * Fibonacci: Dijkstra's Sum of Squares
+ * F2n-1 = Fn-1²+Fn²
+ * F2n = (2 * Fn-1 + Fn) * Fn
  * @author luoruihua
  * @date 2021/01/04
  */
